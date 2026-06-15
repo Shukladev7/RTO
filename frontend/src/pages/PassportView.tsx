@@ -24,6 +24,10 @@ interface Passport {
   ownershipHistory: Array<{ owner: string; from: string; to: string; date: string }>;
   returnHistory: Array<{ reason: string; date: string; condition: string }>;
   routingHistory: RoutingEvent[];
+  lifecycleCount?: number;
+  resaleHistory?: Array<{ listedAt: string; soldAt: string; price: number; buyerName: string; grade: string }>;
+  inspectionHistory?: Array<{ inspectedAt: string; inspector: string; grade: string; physicalCheck: boolean; accessoriesCheck: boolean; batteryHealth: number; cosmeticCheck: boolean; authenticityCheck: boolean; notes: string }>;
+  conditionHistory?: Array<{ condition: string; recordedAt: string; recordedBy: string }>;
 }
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
@@ -132,6 +136,18 @@ export default function PassportView() {
             }}>
               {passport.currentStatus.replace(/_/g, ' ').toUpperCase()}
             </span>
+            {passport.lifecycleCount && passport.lifecycleCount > 1 && (
+              <span style={{
+                padding: '0.2rem 0.6rem',
+                borderRadius: 12,
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                background: '#FFF3CD',
+                color: '#856404',
+              }}>
+                {passport.lifecycleCount === 2 ? '2nd Life' : passport.lifecycleCount === 3 ? '3rd Life' : `${passport.lifecycleCount}th Life`}
+              </span>
+            )}
           </div>
 
           <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.85rem', color: '#565959' }}>
@@ -222,6 +238,41 @@ export default function PassportView() {
                         })}
                       </span>
                     )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Ownership History */}
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: 8,
+            padding: '1.5rem',
+            border: '1px solid #D5D9D9',
+            marginTop: '1.5rem',
+          }}>
+            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0F1111', marginTop: 0, marginBottom: '1rem' }}>
+              Ownership History
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {passport.ownershipHistory.map((entry, idx) => (
+                <div key={idx} style={{
+                  padding: '0.75rem',
+                  background: '#F7F8F8',
+                  borderRadius: 6,
+                  border: '1px solid #EAEDED',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0F1111' }}>{entry.owner}</div>
+                      <div style={{ fontSize: '0.72rem', color: '#565959', marginTop: '0.15rem' }}>
+                        {entry.from} {'\u2192'} {entry.to}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: '#565959' }}>
+                      {new Date(entry.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -388,6 +439,84 @@ export default function PassportView() {
               Scan this code at any hub to access product passport
             </p>
           </div>
+
+          {/* Inspection Reports */}
+          {passport.inspectionHistory && passport.inspectionHistory.length > 0 && (
+            <div style={{
+              background: '#FFFFFF',
+              borderRadius: 8,
+              padding: '1.5rem',
+              border: '1px solid #D5D9D9',
+            }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0F1111', marginTop: 0, marginBottom: '1rem' }}>
+                Inspection Reports
+              </h2>
+              {passport.inspectionHistory.map((insp, idx) => (
+                <div key={idx} style={{ padding: '0.75rem', background: '#F7F8F8', borderRadius: 6, marginBottom: idx < passport.inspectionHistory!.length - 1 ? '0.75rem' : 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                    <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#0F1111' }}>Inspector: {insp.inspector}</span>
+                    <span style={{
+                      padding: '0.1rem 0.5rem',
+                      borderRadius: 10,
+                      fontSize: '0.68rem',
+                      fontWeight: 600,
+                      background: insp.grade === 'A' ? '#D4EDDA' : insp.grade === 'B' ? '#FFF3CD' : '#F8D7DA',
+                      color: insp.grade === 'A' ? '#155724' : insp.grade === 'B' ? '#856404' : '#721C24',
+                    }}>Grade {insp.grade}</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.3rem', fontSize: '0.75rem', color: '#565959' }}>
+                    <span>Physical: <strong style={{ color: insp.physicalCheck ? '#155724' : '#721C24' }}>{insp.physicalCheck ? 'Pass' : 'Fail'}</strong></span>
+                    <span>Accessories: <strong style={{ color: insp.accessoriesCheck ? '#155724' : '#721C24' }}>{insp.accessoriesCheck ? 'Pass' : 'Fail'}</strong></span>
+                    <span>Battery: <strong style={{ color: '#0F1111' }}>{insp.batteryHealth}%</strong></span>
+                    <span>Cosmetic: <strong style={{ color: insp.cosmeticCheck ? '#155724' : '#721C24' }}>{insp.cosmeticCheck ? 'Pass' : 'Fail'}</strong></span>
+                    <span>Authenticity: <strong style={{ color: insp.authenticityCheck ? '#155724' : '#721C24' }}>{insp.authenticityCheck ? 'Pass' : 'Fail'}</strong></span>
+                  </div>
+                  {insp.notes && <p style={{ fontSize: '0.72rem', color: '#565959', margin: '0.4rem 0 0 0', fontStyle: 'italic' }}>{insp.notes}</p>}
+                  <div style={{ fontSize: '0.68rem', color: '#888', marginTop: '0.3rem' }}>
+                    {new Date(insp.inspectedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Resale History */}
+          {passport.resaleHistory && passport.resaleHistory.length > 0 && (
+            <div style={{
+              background: '#FFFFFF',
+              borderRadius: 8,
+              padding: '1.5rem',
+              border: '1px solid #D5D9D9',
+            }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0F1111', marginTop: 0, marginBottom: '1rem' }}>
+                Resale History
+              </h2>
+              {passport.resaleHistory.map((resale, idx) => (
+                <div key={idx} style={{ padding: '0.75rem', background: '#F7F8F8', borderRadius: 6, marginBottom: idx < passport.resaleHistory!.length - 1 ? '0.75rem' : 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0F1111' }}>
+                      {'\u20B9'}{resale.price.toLocaleString('en-IN')}
+                    </span>
+                    <span style={{
+                      padding: '0.1rem 0.5rem',
+                      borderRadius: 10,
+                      fontSize: '0.68rem',
+                      fontWeight: 600,
+                      background: resale.grade === 'A' ? '#D4EDDA' : resale.grade === 'B' ? '#FFF3CD' : '#F8D7DA',
+                      color: resale.grade === 'A' ? '#155724' : resale.grade === 'B' ? '#856404' : '#721C24',
+                    }}>Grade {resale.grade}</span>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#565959' }}>
+                    Buyer: {resale.buyerName}
+                  </div>
+                  <div style={{ fontSize: '0.68rem', color: '#888', marginTop: '0.2rem' }}>
+                    Listed: {new Date(resale.listedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    {resale.soldAt && ` | Sold: ${new Date(resale.soldAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

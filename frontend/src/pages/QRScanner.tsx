@@ -147,7 +147,7 @@ export default function QRScanner() {
       <div style={{ marginTop: '2rem' }}>
         <p style={{ fontSize: '0.85rem', color: '#565959', marginBottom: '0.75rem' }}>Quick Demo Access:</p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center' }}>
-          {['PP-1001', 'PP-1002', 'PP-1005', 'PP-1013', 'PP-1018'].map(id => (
+          {['PP-2001', 'PP-1001', 'PP-1002', 'PP-1005', 'PP-1013'].map(id => (
             <button
               key={id}
               onClick={() => navigate(`/passport/${id}`)}

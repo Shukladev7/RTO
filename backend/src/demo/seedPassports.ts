@@ -15,6 +15,10 @@ interface PassportSeed {
   ownershipHistory: Array<{ owner: string; from: string; to: string; date: string }>;
   returnHistory: Array<{ reason: string; date: string; condition: string }>;
   routingHistory: Array<{ event: string; timestamp: string; details: string; status: 'completed' | 'active' | 'pending' }>;
+  lifecycleCount: number;
+  resaleHistory: Array<{ listedAt: string; soldAt: string; price: number; buyerName: string; grade: string }>;
+  inspectionHistory: Array<{ inspectedAt: string; inspector: string; grade: string; physicalCheck: boolean; accessoriesCheck: boolean; batteryHealth: number; cosmeticCheck: boolean; authenticityCheck: boolean; notes: string }>;
+  conditionHistory: Array<{ condition: string; recordedAt: string; recordedBy: string }>;
 }
 
 const PRODUCTS = [
@@ -161,6 +165,45 @@ function generatePassports(): PassportSeed[] {
     const owner = OWNERS[i]!;
     const buyer = BUYERS[i % BUYERS.length]!;
 
+    // Lifecycle: 2 for indices 0-4, 3 for indices 5-6, 1 for rest
+    const lifecycleCount = i < 5 ? 2 : i < 7 ? 3 : 1;
+
+    // Resale history for passports with lifecycleCount >= 2
+    const resaleHistory: PassportSeed['resaleHistory'] = lifecycleCount >= 2
+      ? [{
+          listedAt: daysAgoISO(30),
+          soldAt: daysAgoISO(25),
+          price: 5000 + i * 1200,
+          buyerName: BUYERS[(i + 3) % BUYERS.length]!.name,
+          grade: i < 3 ? 'A' : 'B',
+        }]
+      : [];
+
+    // Inspection history for at_hub or reallocated
+    const inspectionHistory: PassportSeed['inspectionHistory'] =
+      (status === 'at_hub' || status === 'reallocated')
+        ? [{
+            inspectedAt: daysAgoISO(5),
+            inspector: ['Ravi Kumar', 'Sunita Patel', 'Manoj Verma', 'Anita Sharma'][i % 4]!,
+            grade: i % 3 === 0 ? 'A' : i % 3 === 1 ? 'B' : 'A',
+            physicalCheck: true,
+            accessoriesCheck: i % 4 !== 3,
+            batteryHealth: 70 + (i % 30),
+            cosmeticCheck: i % 5 !== 4,
+            authenticityCheck: true,
+            notes: 'Product verified and certified for resale.',
+          }]
+        : [];
+
+    // Condition history for all passports (2-3 entries)
+    const conditionHistory: PassportSeed['conditionHistory'] = [
+      { condition: 'new', recordedAt: daysAgoISO(60), recordedBy: 'Amazon Warehouse' },
+      { condition: conditions[i]!, recordedAt: daysAgoISO(8), recordedBy: 'Hub Inspector' },
+      ...(lifecycleCount >= 2
+        ? [{ condition: conditions[i]!, recordedAt: daysAgoISO(3), recordedBy: 'Resale Certification' }]
+        : []),
+    ];
+
     const passport: PassportSeed = {
       passportId: `PP-${1000 + idx}`,
       qrCodeValue: `CIRCULAR-PP-${1000 + idx}`,
@@ -186,6 +229,10 @@ function generatePassports(): PassportSeed[] {
         },
       ],
       routingHistory: generateRoutingHistory(status, i),
+      lifecycleCount,
+      resaleHistory,
+      inspectionHistory,
+      conditionHistory,
     };
 
     passports.push(passport);
@@ -197,6 +244,60 @@ function generatePassports(): PassportSeed[] {
 export async function seedPassports(): Promise<number> {
   await ProductPassport.deleteMany({});
   const passports = generatePassports();
+
+  // Add special resale demo phone: 2-year-old Samsung Galaxy S22
+  passports.push({
+    passportId: 'PP-2001',
+    qrCodeValue: 'CIRCULAR-PP-2001',
+    sku: 'SKU-ELE-20001',
+    productName: 'Samsung Galaxy S22 (2 Years Used)',
+    category: 'Electronics',
+    condition: 'good',
+    currentOwner: 'Gaurav Shukla',
+    currentLocation: { city: 'Bhopal', hub: 'HUB-BPL-01' },
+    currentStatus: 'at_hub',
+    eligibilityScore: 82,
+    reservedBuyer: { name: 'Rohit Choudhary', city: 'Bhopal', distance: '4.5 km', score: 91 },
+    ownershipHistory: [
+      { owner: 'Amazon Warehouse', from: 'Fulfillment Center', to: 'Bhopal', date: daysAgoISO(730) },
+      { owner: 'Gaurav Shukla', from: 'Bhopal', to: 'Bhopal', date: daysAgoISO(728) },
+    ],
+    returnHistory: [],
+    routingHistory: [
+      { event: 'Original Purchase', timestamp: daysAgoISO(730), details: 'Purchased new from Amazon for Rs 74,999', status: 'completed' },
+      { event: 'Used by Owner for 2 Years', timestamp: daysAgoISO(365), details: 'Regular use, no damage, battery health 84%', status: 'completed' },
+      { event: 'Resale Requested', timestamp: daysAgoISO(5), details: 'Owner listed for resale via Passport Network', status: 'completed' },
+      { event: 'Pickup Completed', timestamp: daysAgoISO(4), details: 'Picked up from owner address in Bhopal', status: 'completed' },
+      { event: 'Arrived at Hub', timestamp: daysAgoISO(3), details: 'Package received at HUB-BPL-01 for inspection', status: 'completed' },
+      { event: 'Hub Inspection Complete', timestamp: daysAgoISO(2), details: 'Grade B. Battery 84%, minor scratches on back panel. Fully functional.', status: 'completed' },
+      { event: 'AI Resale Analysis', timestamp: daysAgoISO(1), details: 'Suggested price: Rs 28,500. Confidence: 94%. Demand score: High.', status: 'completed' },
+      { event: 'Buyer Matched', timestamp: daysAgoISO(1), details: 'Rohit Choudhary in Bhopal, 4.5 km from hub. Score: 91%.', status: 'active' },
+      { event: 'Awaiting Dispatch', timestamp: '', details: 'Package certified, labeled, ready for dispatch to buyer', status: 'pending' },
+    ],
+    lifecycleCount: 2,
+    resaleHistory: [
+      { listedAt: daysAgoISO(5), soldAt: '', price: 28500, buyerName: 'Rohit Choudhary', grade: 'B' },
+    ],
+    inspectionHistory: [
+      {
+        inspectedAt: daysAgoISO(2),
+        inspector: 'Ravi Kumar',
+        grade: 'B',
+        physicalCheck: true,
+        accessoriesCheck: true,
+        batteryHealth: 84,
+        cosmeticCheck: false,
+        authenticityCheck: true,
+        notes: 'Minor scratches on back panel. Screen perfect. All buttons functional. Charger and cable included. Battery health 84% - good for 2-year-old device.',
+      },
+    ],
+    conditionHistory: [
+      { condition: 'new', recordedAt: daysAgoISO(730), recordedBy: 'Amazon Warehouse' },
+      { condition: 'good', recordedAt: daysAgoISO(5), recordedBy: 'Owner Self-Assessment' },
+      { condition: 'good', recordedAt: daysAgoISO(2), recordedBy: 'Hub Inspector - Ravi Kumar' },
+    ],
+  } as PassportSeed);
+
   await ProductPassport.insertMany(passports);
   return passports.length;
 }

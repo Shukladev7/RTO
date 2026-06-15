@@ -10,6 +10,10 @@ import QRScanner from './pages/QRScanner';
 import PassportView from './pages/PassportView';
 import HubConsole from './pages/HubConsole';
 import CircularDashboard from './pages/CircularDashboard';
+import PassportList from './pages/PassportList';
+import ResaleMarketplace from './pages/ResaleMarketplace';
+import SellProduct from './pages/SellProduct';
+import InspectionCenter from './pages/InspectionCenter';
 // DemoBanner available for overlay mode if needed
 // import DemoBanner from './components/DemoBanner';
 
@@ -28,6 +32,10 @@ function App() {
           <Route path="passport/:passportId" element={<PassportView />} />
           <Route path="hub" element={<HubConsole />} />
           <Route path="circular" element={<CircularDashboard />} />
+          <Route path="passports" element={<PassportList />} />
+          <Route path="resale" element={<ResaleMarketplace />} />
+          <Route path="sell" element={<SellProduct />} />
+          <Route path="inspection" element={<InspectionCenter />} />
         </Route>
       </Routes>
     </BrowserRouter>

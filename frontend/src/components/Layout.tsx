@@ -3,11 +3,11 @@ import { NavLink, Outlet } from 'react-router-dom';
 const navItems = [
   { to: '/', label: 'Dashboard' },
   { to: '/circular', label: 'Circular Routing' },
+  { to: '/passports', label: 'Product Passports' },
   { to: '/scanner', label: 'QR Scanner' },
-  { to: '/hub', label: 'Hub Console' },
+  { to: '/hub', label: 'Hub Operations' },
+  { to: '/inspection', label: 'Inspections' },
   { to: '/rto-events', label: 'Exceptions' },
-  { to: '/decisions', label: 'Decisions' },
-  { to: '/courier-escalations', label: 'Escalations' },
   { to: '/metrics', label: 'Metrics' },
   { to: '/configuration', label: 'Settings' },
 ];

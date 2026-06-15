@@ -15,6 +15,10 @@ export interface IProductPassport extends Document {
   ownershipHistory: Array<{ owner: string; from: string; to: string; date: string }>;
   returnHistory: Array<{ reason: string; date: string; condition: string }>;
   routingHistory: Array<{ event: string; timestamp: string; details: string; status: 'completed' | 'active' | 'pending' }>;
+  lifecycleCount: number;
+  resaleHistory: Array<{ listedAt: string; soldAt: string; price: number; buyerName: string; grade: string }>;
+  inspectionHistory: Array<{ inspectedAt: string; inspector: string; grade: string; physicalCheck: boolean; accessoriesCheck: boolean; batteryHealth: number; cosmeticCheck: boolean; authenticityCheck: boolean; notes: string }>;
+  conditionHistory: Array<{ condition: string; recordedAt: string; recordedBy: string }>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -68,6 +72,36 @@ const ProductPassportSchema = new Schema<IProductPassport>(
         timestamp: String,
         details: String,
         status: { type: String, enum: ['completed', 'active', 'pending'] },
+      },
+    ],
+    lifecycleCount: { type: Number, default: 1 },
+    resaleHistory: [
+      {
+        listedAt: String,
+        soldAt: String,
+        price: Number,
+        buyerName: String,
+        grade: String,
+      },
+    ],
+    inspectionHistory: [
+      {
+        inspectedAt: String,
+        inspector: String,
+        grade: String,
+        physicalCheck: Boolean,
+        accessoriesCheck: Boolean,
+        batteryHealth: Number,
+        cosmeticCheck: Boolean,
+        authenticityCheck: Boolean,
+        notes: String,
+      },
+    ],
+    conditionHistory: [
+      {
+        condition: String,
+        recordedAt: String,
+        recordedBy: String,
       },
     ],
   },

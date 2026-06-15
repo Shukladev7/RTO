@@ -54,9 +54,9 @@ export default function CircularDashboard() {
       }}>
         {[
           { label: 'Products Reallocated', value: '12,842', color: '#FF9900' },
+          { label: 'Products Resold', value: '4,128', color: '#004085' },
           { label: 'Warehouse Returns Avoided', value: '8,214', color: '#067D06' },
-          { label: 'Cost Saved', value: '\u20B918.4 Lakhs', color: '#004085' },
-          { label: 'CO2 Reduced', value: '3.2 Tons', color: '#155724' },
+          { label: 'Lifecycle Extensions', value: '6,847', color: '#155724' },
         ].map((stat, idx) => (
           <div key={idx} style={{
             background: '#FFFFFF',
@@ -150,6 +150,52 @@ export default function CircularDashboard() {
             <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#0F1111' }}>Direct Routing</div>
             <div style={{ fontSize: '0.72rem', color: '#565959', marginTop: '0.25rem' }}>Hub to buyer, skip warehouse</div>
           </div>
+        </div>
+      </div>
+
+      {/* Product Lifecycle */}
+      <div style={{
+        background: '#FFFFFF',
+        borderRadius: 8,
+        padding: '1.5rem',
+        border: '1px solid #D5D9D9',
+        marginBottom: '2rem',
+      }}>
+        <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0F1111', marginTop: 0, marginBottom: '1.25rem' }}>
+          Product Lifecycle
+        </h2>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '0.25rem' }}>
+          {[
+            { label: 'New Purchase', bg: '#D4EDDA', text: '#155724' },
+            { label: 'Return / Resale', bg: '#F8D7DA', text: '#721C24' },
+            { label: 'AI Analysis', bg: '#CCE5FF', text: '#004085' },
+            { label: 'Buyer Match', bg: '#FFF3CD', text: '#856404' },
+            { label: 'Direct Routing', bg: '#FFE0B2', text: '#E65100' },
+            { label: 'New Owner', bg: '#D4EDDA', text: '#155724' },
+          ].map((step, idx) => (
+            <div key={idx} style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{
+                padding: '0.5rem 1rem',
+                borderRadius: 20,
+                background: step.bg,
+                color: step.text,
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                whiteSpace: 'nowrap',
+              }}>
+                {step.label}
+              </div>
+              {idx < 5 && (
+                <span style={{ fontSize: '1.2rem', color: '#FF9900', fontWeight: 700, margin: '0 0.3rem' }}>{'\u2192'}</span>
+              )}
+            </div>
+          ))}
+        </div>
+        <div style={{ textAlign: 'center', marginTop: '0.75rem' }}>
+          <span style={{ fontSize: '0.72rem', color: '#565959' }}>
+            Circular loop: products re-enter the lifecycle instead of returning to warehouse
+          </span>
         </div>
       </div>
 

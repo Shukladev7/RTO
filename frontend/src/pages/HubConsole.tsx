@@ -231,7 +231,7 @@ export default function HubConsole() {
           <div style={{ marginTop: '1.5rem', borderTop: '1px solid #F0F2F2', paddingTop: '1rem' }}>
             <p style={{ fontSize: '0.78rem', color: '#888', marginBottom: '0.5rem' }}>Demo Quick Scan:</p>
             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-              {['PP-1013', 'PP-1014', 'PP-1015'].map(id => (
+              {['PP-2001', 'PP-1013', 'PP-1014'].map(id => (
                 <button
                   key={id}
                   onClick={() => handleScan(id)}
